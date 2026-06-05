@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | Eco-Audit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #f4f7f4; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: #1e4620; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; }
+        .table-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .badge-approved { background-color: #2d6a2d; color: white; }
+        .badge-pending { background-color: #ffc107; color: dark; }
+        .img-proof { max-width: 60px; border-radius: 6px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">🌱 Eco-Audit System</a>
+        <div class="navbar-nav ms-auto">
+            <span class="nav-link text-white me-3">🎓 Student: <strong>{{ user.user_name }}</strong></span>
+            <a class="btn btn-sm btn-outline-light" href="/logout">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">My Analytics</h2>
+            <span class="text-muted small">{{ user.user_name }} • Personal Workspace</span>
+        </div>
+        <button class="btn btn-warning text-dark btn-sm fw-bold px-3 rounded-pill">Getting Started</button>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-left: 5px solid #2d6a2d;">
+                <span class="text-muted small fw-bold">Tasks completed</span>
+                <h3 class="fw-bold text-dark mt-1">{{ approved or 0 }} / {{ total or 0 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-left: 5px solid #0dcaf0;">
+                <span class="text-muted small fw-bold">Est. Attendance</span>
+                <h3 class="fw-bold text-info mt-1">75%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-left: 5px solid #ffc107;">
+                <span class="text-muted small fw-bold">Hours logged</span>
+                <h3 class="fw-bold text-warning mt-1">{{ hours_logged or 0.0 }} hrs</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 text-center" style="border-left: 5px solid #dc3545;">
+                <span class="text-muted small fw-bold">Approval rate</span>
+                <h3 class="fw-bold text-danger mt-1">{{ approval_rate or '0%' }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card p-4" style="height: 320px;">
+                <h6 class="fw-bold text-muted mb-3">MY SCORE OVER TIME (GROWTH RATE)</h6>
+                <div class="w-100 h-100 position-relative">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card p-4" style="height: 320px;">
+                <h6 class="fw-bold text-muted mb-3">ACTIVITY TYPE BREAKDOWN</h6>
+                <div class="w-100 h-100 position-relative">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-4" style="height: 320px;">
+                <h6 class="fw-bold text-muted mb-3">ATTENDANCE / ENGAGEMENT PER MONTH</h6>
+                <div class="w-100 h-100 position-relative">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-4" style="height: 320px;">
+                <h6 class="fw-bold text-muted mb-3">LIVE TASK COMPLETION STATUS</h6>
+                <div class="w-100 h-100 position-relative">
+                    <canvas id="taskStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <h5 class="fw-bold text-dark mb-4">📸 DETAILED TASK HISTORY</h5>
+        <table class="table align-middle mb-0">
+            <thead class="table-light text-secondary">
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Activity Title</th>
+                    <th scope="col">Photo Proof</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not submissions %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">No field submissions logged in this workspace registry yet.</td>
+                </tr>
+                {% else %}
+                    {% for sub in submissions %}
+                    <tr>
+                        <td class="text-muted">{{ sub.submitted_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="fw-bold text-dark">{{ sub.activity_title }}</td>
+                        <td>
+                            {% if sub.photo_path %}
+                                <a href="{{ sub.photo_path }}" target="_blank">
+                                    <img src="{{ sub.photo_path }}" class="img-proof" alt="Proof">
+                                </a>
+                            {% else %}
+                                <span class="text-muted small">No Asset</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if sub.status == 'Approved' %}
+                                <span class="badge badge-approved px-3 py-1 rounded-pill">Approved</span>
+                            {% else %}
+                                <span class="badge badge-pending text-dark px-3 py-1 rounded-pill">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<span id="meta-approved" style="display: none;">{{ approved or 0 }}</span>
+<span id="meta-pending" style="display: none;">{{ pending or 0 }}</span>
+<span id="meta-rejected" style="display: none;">{{ rejected or 0 }}</span>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Extract hidden configuration parameters safely without rendering errors
+    const approvedCount = parseInt(document.getElementById('meta-approved').textContent.trim() || '0');
+    const pendingCount = parseInt(document.getElementById('meta-pending').textContent.trim() || '0');
+    const rejectedCount = parseInt(document.getElementById('meta-rejected').textContent.trim() || '0');
+
+    // Chart 1: Growth Rate Engine
+    new Chart(document.getElementById('growthChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+            datasets: [{
+                data: [50, 60, 45, 50],
+                borderColor: '#2d6a2d',
+                backgroundColor: 'rgba(45, 106, 45, 0.05)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // Chart 2: Activity Breakdown Engine
+    new Chart(document.getElementById('typeChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Tree plantation', 'Waste mgmt', 'Conservation', 'Composting'],
+            datasets: [{
+                data: [40, 25, 20, 15],
+                backgroundColor: ['#198754', '#0d6efd', '#ffc107', '#dc3545']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // Chart 3: Monthly Engagement Engine
+    new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+            datasets: [{
+                data: [78, 84, 89, 74],
+                backgroundColor: ['#b3d1ff', '#b3d1ff', '#0d6efd', '#0d6efd']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // Chart 4: 🔥 DYNAMICALLY REALIGN TASK COMPLETION STATUS
+    new Chart(document.getElementById('taskStatusChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Approved', 'Pending', 'Rejected'],
+            datasets: [{
+                label: 'Tasks Count',
+                data: [approvedCount, pendingCount, rejectedCount],
+                backgroundColor: ['#2d6a2d', '#ffc107', '#dc3545'],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+});
+</script>
+
+</body>
+</html>

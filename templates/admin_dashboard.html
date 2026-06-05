@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Eco-Audit</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f4f0; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: #1a401a; }
+        .dashboard-container { max-width: 1200px; margin: 40px auto; }
+        .stat-card { background: white; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 5px solid; }
+        .stat-number { font-size: 2.5rem; font-weight: bold; }
+        .card-custom { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: none; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark px-4 py-3 d-flex justify-content-between align-items-center">
+    <span class="navbar-brand fw-bold">⚙️ Eco-Audit System (Admin Panel)</span>
+    <div>
+        <span class="text-white me-3">👑 Welcome, {{ user.user_name }}</span>
+        <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+    </div>
+</nav>
+
+<div class="container dashboard-container">
+    
+    <h4 style="color: #1a401a; font-weight: 600;" class="mb-4">📊 Institutional Overview</h4>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card" style="border-color: #0d6efd;">
+                <div class="text-muted fw-bold">Total Students</div>
+                <div class="stat-number text-primary">{{ stats.students }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-color: #6f42c1;">
+                <div class="text-muted fw-bold">Total Teachers</div>
+                <div class="stat-number" style="color: #6f42c1;">{{ stats.teachers }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-color: #fd7e14;">
+                <div class="text-muted fw-bold">Total Activities</div>
+                <div class="stat-number" style="color: #fd7e14;">{{ stats.activities }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-color: #198754;">
+                <div class="text-muted fw-bold">Tasks Uploaded</div>
+                <div class="stat-number text-success">{{ stats.submissions }}</div>
+            </div>
+        </div>
+    </div>
+
+    <h4 style="color: #1a401a; font-weight: 600;" class="mb-3">👥 System Users Record</h4>
+    <div class="card-custom">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead style="background-color: #e8f5e8; color: #1a401a;">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in all_users %}
+                    <tr>
+                        <td class="fw-bold">{{ u.name }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            {% if u.role == 'teacher' %}
+                                <span class="badge bg-info text-dark">Teacher</span>
+                            {% elif u.role == 'admin' %}
+                                <span class="badge bg-dark">Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Student</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ u.department or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    {% if not all_users %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">No records found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

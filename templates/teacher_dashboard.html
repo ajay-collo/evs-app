@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Management Console</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .table-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+        .scrollable-list { max-height: 320px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand text-success fw-bold" href="#">🌱 Environmental Faculty Core</a>
+            <div class="navbar-nav ms-auto text-white">
+                Welcome, <strong class="text-success mx-2">{{ user.user_name }}</strong> | 
+                <a class="btn btn-sm btn-danger ms-3" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        
+        <div class="card p-4 mb-4" style="background: #e8f5e8; border-left: 6px solid #2d9a2d;">
+            <h5 class="fw-bold text-dark mb-2">📢 Student Course Invitation Link Engine</h5>
+            <p class="text-muted small mb-3">Hi unique registration link tumchya batch chya student group var share kara.</p>
+            <div class="input-group">
+                <input type="text" id="inviteUrl" class="form-control fw-semibold" value="{{ invite_link }}" readonly>
+                <button class="btn btn-success fw-bold px-4" onclick="copyInviteLink()">📋 Copy Link</button>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="card p-3 bg-white border-start border-primary border-4"><span>LINKED STUDENTS</span><h3 class="fw-bold mt-1">{{ stats.total_students }}</h3></div></div>
+            <div class="col-md-3"><div class="card p-3 bg-white border-start border-success border-4"><span>SUBMISSIONS LOGS</span><h3 class="fw-bold mt-1">{{ stats.total_submissions }}</h3></div></div>
+            <div class="col-md-3"><div class="card p-3 bg-white border-start border-warning border-4"><span>ATTENDANCE RATE</span><h3 class="fw-bold mt-1">{{ stats.attendance_rate }}</h3></div></div>
+            <div class="col-md-3"><div class="card p-3 bg-white border-start border-info border-4"><span>ACTIVITY RATIO</span><h3 class="fw-bold mt-1">{{ stats.growth_rate }}</h3></div></div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-5">
+                <div class="card p-4 bg-white h-100 shadow-sm">
+                    <h4 class="fw-bold mb-3">🛠️ Deploy New Field Activity</h4>
+                    <form id="activityForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Activity Title</label>
+                            <input type="text" id="actTitle" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Instructions</label>
+                            <textarea id="actDesc" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">🔒 On-Site Attendance Locking Matrix</label>
+                            <div class="border rounded p-2 scrollable-list bg-light">
+                                {% if students %}
+                                    {% for student in students %}
+                                    <div class="form-check p-1">
+                                        <input class="form-check-input student-checkbox ms-1 me-2" type="checkbox" value="{{ student.id }}" id="stu_{{ student.id }}">
+                                        <label class="form-check-label small fw-semibold" for="stu_{{ student.id }}">{{ student.name }} ({{ student.student_id }})</label>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted text-center small my-3">No students linked yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">⚡ Generate QR Gate</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card p-4 bg-white h-100 shadow-sm">
+                    <h4 class="fw-bold mb-3">📈 Engagement Metric Overviews</h4>
+                    <div class="chart-container" style="position: relative; width:100%; height:320px;">
+                        <canvas id="submissionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container mb-5">
+            <h4 class="fw-bold mb-3">📋 Deployed Activities Live Directory</h4>
+            <table class="table align-middle">
+                <thead class="table-dark"><tr><th>Activity Title</th><th>Token</th><th>QR Code</th><th>Secure Link</th></tr></thead>
+                <tbody>
+                    {% if activities %}
+                        {% for act in activities %}
+                        <tr>
+                            <td><strong>{{ act.title }}</strong><br><small class="text-muted">{{ act.description }}</small></td>
+                            <td><code>{{ act.token }}</code></td>
+                            <td><a href="{{ act.qr_code_path }}" target="_blank"><img src="{{ act.qr_code_path }}" style="width: 45px;"></a></td>
+                            <td><a href="/task/{{ act.token }}" target="_blank" class="btn btn-sm btn-outline-success">Launch Link</a></td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container mb-5">
+            <h4 class="fw-bold mb-3">🎓 Isolated Batch Registry</h4>
+            <table class="table align-middle">
+                <thead class="table-dark"><tr><th>Full Name</th><th>Roll No</th><th>Department</th><th>Total Logs</th><th>Analytics</th></tr></thead>
+                <tbody>
+                    {% if students %}
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.name }}</td>
+                            <td><code>{{ student.student_id }}</code></td>
+                            <td>{{ student.department if student.department else 'General' }}</td>
+                            <td>{{ student.total_submissions }}</td>
+                            <td><a href="/teacher/student/{{ student.id }}/analytics" class="btn btn-sm btn-dark">View Report</a></td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+   <div class="table-container">
+            <h4 class="fw-bold mb-3">📥 Live Proof Audit Log Gateway</h4>
+            <table class="table align-middle">
+                <thead class="table-dark"><tr><th>Student Info</th><th>Activity</th><th>Captured Assets</th><th>Timeline</th><th>Verification</th></tr></thead>
+                <tbody>
+                    {% if field_submissions %}
+                        {% for sub in field_submissions %}
+                        <tr>
+                            <td><strong>{{ sub.student_name }}</strong><br><small>ID: {{ sub.roll_no }}</small></td>
+                            <td>{{ sub.activity_title }}</td>
+                            <td>
+                                {% if sub.photo_path %}
+                                    <a href="{{ sub.photo_path }}" target="_blank" class="badge bg-primary text-white p-1 me-1 text-decoration-none">📸 Image</a>
+                                {% endif %}
+                                {% if sub.video_path %}
+                                    <a href="{{ sub.video_path }}" target="_blank" class="badge bg-info text-dark p-1 me-1 text-decoration-none">🎥 Video</a>
+                                {% endif %}
+                                {% if sub.pdf_path %}
+                                    <a href="{{ sub.pdf_path }}" target="_blank" class="badge bg-danger text-white p-1 text-decoration-none">📄 PDF</a>
+                                {% endif %}
+                            </td>
+                            <td>{{ sub.submitted_at.strftime('%d-%b-%Y') if sub.submitted_at else 'N/A' }}</td>
+                            <td id="status_box_{{ sub.submission_id }}">
+                                {% if sub.status == 'Approved' %}
+                                    <span class="badge bg-success p-2">Verified ✓</span>
+                                {% else %}
+                                    <button onclick="approveSubmission('{{ sub.submission_id }}')" class="btn btn-sm btn-warning fw-bold">Approve</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+   <script>
+        function copyInviteLink() {
+            var copyText = document.getElementById("inviteUrl");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("Invitation Link Copy Zali Bhava! Group var share kar.");
+        }
+
+        document.getElementById('activityForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let selectedStudents = [];
+            document.querySelectorAll('.student-checkbox:checked').forEach(cb => selectedStudents.push(cb.value));
+            fetch('/create_activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: document.getElementById('actTitle').value,
+                    description: document.getElementById('actDesc').value,
+                    present_students: selectedStudents
+                })
+            }).then(res => res.json()).then(data => { alert(data.message); window.location.reload(); });
+        });
+
+        function approveSubmission(subId) {
+            fetch(`/approve_submission/${subId}`, { method: 'POST' })
+            .then(res => res.json()).then(data => {
+                document.getElementById(`status_box_${subId}`).innerHTML = `<span class="badge bg-success p-2">Verified ✓</span>`;
+            });
+        }
+
+        // 🔥 FIXED VS CODE LINTER COMPLIANCE PATTERN
+        const ctx = document.getElementById('submissionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ stats.chart_labels | tojson | safe }}'),
+                datasets: [{
+                    label: 'Submissions Matrix',
+                    data: JSON.parse('{{ stats.chart_values | tojson | safe }}'),
+                    backgroundColor: 'rgba(25, 135, 84, 0.3)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    </script>
+</body>
+</html>

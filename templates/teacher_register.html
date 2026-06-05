@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f4f0; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: #2d6a2d; }
+        .card { border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .btn-green { background: #2d6a2d; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-size: 15px; font-weight: 600; }
+        .btn-green:hover { background: #1e4e1e; color: white; }
+        .form-control:focus { border-color: #2d6a2d; box-shadow: 0 0 0 3px rgba(45,106,45,0.12); }
+        .error-box { background: #fff0f0; border-left: 4px solid #a32d2d; color: #a32d2d; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; display: none; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark px-4 py-3 d-flex justify-content-between align-items-center">
+    <span class="navbar-brand fw-bold">🌱 Environmental Education System</span>
+    <a href="/login" class="btn btn-outline-light btn-sm">← Back to Login</a>
+</nav>
+<div class="container" style="max-width: 500px; margin-top: 40px;">
+    <div class="card p-4">
+        <div style="background:#2d6a2d; margin:-24px -24px 24px; padding:24px; border-radius:16px 16px 0 0; text-align:center;">
+            <h4 style="color:white; margin:0;">👩‍🏫 Teacher Registration</h4>
+            <p style="color:rgba(255,255,255,0.8); margin:6px 0 0; font-size:14px;">Create your teacher account</p>
+        </div>
+
+        <div id="error-box" class="error-box"></div>
+
+        <form id="teacher-form" onsubmit="handleRegister(event)">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Full Name *</label>
+                <input type="text" name="full_name" class="form-control" placeholder="Your full name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Email Address *</label>
+                <input type="email" name="email" class="form-control" placeholder="teacher@school.edu" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Password *</label>
+                <input type="password" name="password" class="form-control" placeholder="Min 6 characters" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Confirm Password *</label>
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm password" required>
+            </div>
+            <button type="submit" class="btn-green" id="reg-btn">Register as Teacher →</button>
+        </form>
+
+        <hr class="my-3">
+        <p class="text-center text-muted" style="font-size:13px;">
+            Already have account? <a href="/login" style="color:#2d6a2d; font-weight:600;">Login here</a>
+        </p>
+    </div>
+</div>
+
+<script>
+function handleRegister(event) {
+    event.preventDefault();
+    const form = event.target;
+    const btn = document.getElementById('reg-btn');
+    const errorBox = document.getElementById('error-box');
+    errorBox.style.display = 'none';
+
+    const data = {
+        full_name: form.full_name.value.trim(),
+        email:     form.email.value.trim(),
+        password:  form.password.value,
+    };
+
+    if (form.password.value !== form.confirm_password.value) {
+        errorBox.textContent = '❌ Passwords match nahi!';
+        errorBox.style.display = 'block';
+        return;
+    }
+    if (data.password.length < 6) {
+        errorBox.textContent = '❌ Password minimum 6 characters asava!';
+        errorBox.style.display = 'block';
+        return;
+    }
+
+    btn.textContent = 'Registering...';
+    btn.disabled = true;
+
+    fetch('/register/teacher', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            btn.textContent = '✅ Account created! Redirecting...';
+            window.location.href = '/login';
+        } else {
+            errorBox.textContent = '❌ ' + data.message;
+            errorBox.style.display = 'block';
+            btn.textContent = 'Register as Teacher →';
+            btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        errorBox.textContent = '❌ Server error. Flask running ahe ka?';
+        errorBox.style.display = 'block';
+        btn.textContent = 'Register as Teacher →';
+        btn.disabled = false;
+    });
+}
+</script>
+</body>
+</html>

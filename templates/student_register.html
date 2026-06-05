@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Environmental Education System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            min-height: 100vh;
+            background: #f0f4f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: #2d6a2d;
+            padding: 14px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-brand {
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .navbar-brand span { color: white; font-size: 18px; font-weight: 600; }
+        .btn-back {
+            color: white;
+            border: 2px solid rgba(255,255,255,0.6);
+            padding: 7px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .btn-back:hover { background: white; color: #2d6a2d; border-color: white; }
+
+        /* ── MAIN LAYOUT ── */
+        .register-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f4f0 50%, #e0ede0 100%);
+        }
+
+        .register-wrapper::before {
+            content: '';
+            position: fixed;
+            top: -80px; right: -80px;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: rgba(45,106,45,0.06);
+            pointer-events: none;
+        }
+        .register-wrapper::after {
+            content: '';
+            position: fixed;
+            bottom: -60px; left: -60px;
+            width: 240px; height: 240px;
+            border-radius: 50%;
+            background: rgba(45,106,45,0.06);
+            pointer-events: none;
+        }
+
+        /* ── CARD ── */
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(45,106,45,0.12), 0 2px 8px rgba(0,0,0,0.06);
+            width: 100%;
+            max-width: 520px;
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header-custom {
+            background: #2d6a2d;
+            padding: 28px 36px 24px;
+            text-align: center;
+        }
+        .card-header-custom h2 {
+            font-family: 'Merriweather', serif;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .card-header-custom p {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+
+        .card-body-custom { padding: 32px 36px 36px; }
+
+        /* ── ROLE SELECTOR (Same as Login) ── */
+        .step-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2d6a2d;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .role-btn {
+            border: 2px solid #e0e8e0;
+            border-radius: 12px;
+            padding: 16px 8px 14px;
+            background: #f8fbf8;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+        .role-btn:hover {
+            border-color: #2d6a2d;
+            background: #f0f8f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45,106,45,0.12);
+        }
+        .role-btn.active {
+            border-color: #2d6a2d;
+            background: #e8f5e8;
+            box-shadow: 0 4px 16px rgba(45,106,45,0.18);
+            transform: translateY(-2px);
+        }
+        .role-btn .role-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid #e0e8e0;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .role-btn.active .role-icon {
+            background: #2d6a2d;
+            border-color: #2d6a2d;
+        }
+        .role-btn.active .role-icon svg path,
+        .role-btn.active .role-icon svg circle,
+        .role-btn.active .role-icon svg rect {
+            stroke: white !important;
+            fill: rgba(255,255,255,0.15) !important;
+        }
+        .role-btn .role-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a3a1a;
+        }
+        .role-btn.active .role-label { color: #2d6a2d; }
+
+        /* ── FORMS ── */
+        .form-section { display: none; }
+        .form-section.visible { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e8f5e8;
+            border: 1px solid #c5dfc5;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2d6a2d;
+            margin-bottom: 20px;
+        }
+        .role-badge svg { width: 14px; height: 14px; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2a4a2a;
+            margin-bottom: 7px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 11px 16px;
+            border: 1.5px solid #d0dcd0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1a2a1a;
+            background: #fafcfa;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2d6a2d;
+            box-shadow: 0 0 0 3px rgba(45,106,45,0.12);
+            background: white;
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-row .form-group { margin-bottom: 0; }
+
+        .btn-container { display: flex; gap: 12px; margin-top: 24px; }
+        .btn-register {
+            flex: 1; background: #2d6a2d; color: white; border: none; padding: 13px;
+            border-radius: 8px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-register:hover { background: #1e4e1e; }
+        .btn-cancel {
+            flex: 1; background: #f0f0f0; color: #2d6a2d; border: 1.5px solid #d0dcd0;
+            padding: 13px; border-radius: 8px; font-weight: 600; cursor: pointer;
+            text-decoration: none; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-cancel:hover { background: #e8f5e8; border-color: #2d6a2d; }
+
+        .error-msg {
+            background: #fff0f0; border-left: 4px solid #a32d2d; color: #a32d2d;
+            border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; display: none;
+        }
+
+        .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e0e8e0; }
+        .divider span { font-size: 12px; color: #aab8aa; white-space: nowrap; }
+
+        /* ── PLACEHOLDER for role not selected ── */
+        .no-role-msg { text-align: center; padding: 24px 0 8px; color: #aab8aa; font-size: 14px; }
+        .no-role-msg svg { display: block; margin: 0 auto 10px; opacity: 0.35; }
+
+        /* ── FOOTER ── */
+        footer { background: #f0f0ec; padding: 18px 40px; text-align: center; border-top: 1px solid #ddd; }
+        footer p { font-size: 13px; color: #888; }
+        
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .btn-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="navbar-brand">
+        <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="18" fill="#1a4f1a" stroke="white" stroke-width="1.5"/>
+            <ellipse cx="20" cy="20" rx="8" ry="18" fill="none" stroke="white" stroke-width="1" opacity="0.6"/>
+            <line x1="2" y1="20" x2="38" y2="20" stroke="white" stroke-width="1" opacity="0.6"/>
+        </svg>
+        <span>Environmental Education System</span>
+    </a>
+    <a href="/" class="btn-back">&#8592; Back to Home</a>
+</nav>
+
+<div class="register-wrapper">
+    <div class="register-card">
+        <div class="card-header-custom">
+            <h2>Create an Account</h2>
+            <p>Join our environmental learning community</p>
+        </div>
+        <div class="card-body-custom">
+
+            <p class="step-label">Step 1 — Register As</p>
+            <div class="role-grid">
+                <div class="role-btn" id="role-student" onclick="selectRole('student')">
+                    <div class="role-icon">
+                        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                            <circle cx="26" cy="16" r="9" fill="#2d6a2d" opacity="0.85"/>
+                            <path d="M8 44c0-9.94 8.06-18 18-18s18 8.06 18 18" stroke="#2d6a2d" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="role-label">Student</span>
+                </div>
+                <div class="role-btn" id="role-teacher" onclick="selectRole('teacher')">
+                    <div class="role-icon">
+                        <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                            <circle cx="20" cy="14" r="7" fill="#2d6a2d" opacity="0.85"/>
+                            <path d="M6 38c0-7.73 6.27-14 14-14s14 6.27 14 14" stroke="#2d6a2d" stroke-width="2.5" stroke-linecap="round"/>
+                            <rect x="32" y="18" width="14" height="10" rx="2" fill="#2d6a2d" opacity="0.2" stroke="#2d6a2d" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <span class="role-label">Teacher</span>
+                </div>
+            </div>
+
+            <div id="no-role-msg" class="no-role-msg">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="8" y="18" width="24" height="18" rx="4" stroke="#2d6a2d" stroke-width="1.5"/><path d="M14 18v-5a6 6 0 0 1 12 0v5" stroke="#2d6a2d" stroke-width="1.5" stroke-linecap="round"/><circle cx="20" cy="27" r="2" fill="#2d6a2d" opacity="0.5"/></svg>
+                Select a role above to register
+            </div>
+
+            <div id="error-msg" class="error-msg"></div>
+
+            <div id="form-student" class="form-section">
+                <p class="step-label">Step 2 — Student Details</p>
+                <form onsubmit="handleRegister(event, 'student')">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="full_name" placeholder="e.g. Ajay Pathade" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Email Address *</label><input type="email" name="email" placeholder="your@email.com" required></div>
+                        <div class="form-group"><label>Student ID *</label><input type="text" name="s_id" placeholder="STU2024001" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" name="password" placeholder="Min 6 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password *</label>
+                            <input type="password" name="confirm_password" placeholder="Confirm password" required>
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-register">Register as Student</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="form-teacher" class="form-section">
+                <p class="step-label">Step 2 — Teacher Details</p>
+                <form onsubmit="handleRegister(event, 'teacher')">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="full_name" placeholder="e.g. Prof. Kumar" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Email Address *</label><input type="email" name="email" placeholder="teacher@college.edu" required></div>
+                        <div class="form-group"><label>Teacher ID *</label><input type="text" name="t_id" placeholder="TCH100" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" name="password" placeholder="Min 6 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password *</label>
+                            <input type="password" name="confirm_password" placeholder="Confirm password" required>
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-register">Register as Teacher</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="divider"><span>Already have an account?</span></div>
+            <p style="text-align: center; font-size: 13px;">
+                <a href="/login_page" style="color: #2d6a2d; font-weight: 600; text-decoration: none;">Go to Login Page</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<footer><p>© 2026 Environmental Education Project</p></footer>
+
+<script>
+    function selectRole(role) {
+        document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.form-section').forEach(f => f.classList.remove('visible'));
+
+        document.getElementById('role-' + role).classList.add('active');
+        document.getElementById('no-role-msg').style.display = 'none';
+        document.getElementById('form-' + role).classList.add('visible');
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('error-msg');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    function handleRegister(event, role) {
+        event.preventDefault();
+        const form = event.target;
+        const btn = form.querySelector('.btn-register');
+        const formData = new FormData(form);
+
+        const password = formData.get('password');
+        const confirmPassword = formData.get('confirm_password');
+
+        if (password !== confirmPassword) {
+            showError('❌ Passwords do not match!');
+            return;
+        }
+
+        if (password.length < 6) {
+            showError('❌ Password must be at least 6 characters long!');
+            return;
+        }
+
+        btn.innerHTML = 'Registering...';
+        btn.disabled = true;
+
+        fetch('/register/' + role, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData))
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                btn.innerHTML = '✓ Success! Redirecting...';
+                setTimeout(() => { window.location.href = data.redirect || '/login_page'; }, 1500);
+            } else {
+                showError('❌ ' + (data.message || 'Registration failed.'));
+                btn.innerHTML = 'Register as ' + role;
+                btn.disabled = false;
+            }
+        })
+        .catch(error => {
+            showError('❌ Server error. Please try again later.');
+            btn.innerHTML = 'Register as ' + role;
+            btn.disabled = false;
+        });
+    }
+</script>
+</body>
+</html>
