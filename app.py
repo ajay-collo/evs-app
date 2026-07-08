@@ -9,9 +9,8 @@ import secrets
 app = Flask(__name__, template_folder='templates')
 app.secret_key = "super_secret_session_key_synopsis_compliant_v21"
 
-# ========================================================
 # OPTIMIZED POSTGRESQL DATABASE CONNECTION POOL PATTERN
-# ========================================================
+
 def get_db_connection():
     return psycopg2.connect(
         dbname="env_education",
@@ -20,9 +19,66 @@ def get_db_connection():
         host="localhost"
     )
 
-# ========================================================
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+from flask import Flask, render_template, request, redirect, session, jsonify, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
+import psycopg2
+import psycopg2.extras
+import qrcode
+import os
+import secrets
+
+app = Flask(__name__, template_folder='templates')
+app.secret_key = "super_secret_session_key_synopsis_compliant_v21"
+# OPTIMIZED POSTGRESQL DATABASE CONNECTION POOL PATTERN
+
+def get_db_connection():
+    return psycopg2.connect(
+        dbname="env_education",
+        user="postgres",
+        password="@anu_0809", 
+        host="localhost"
+    )
+
 # AUTO-RECOVERABLE TRANSACTIONS INITIALIZATION
-# ========================================================
+
 def init_db():
     with get_db_connection() as conn:
         with conn.cursor() as cur:
